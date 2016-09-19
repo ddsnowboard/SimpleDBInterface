@@ -18,6 +18,12 @@ class TestSqlite(unittest.TestCase):
         selection = table.select()
         self.assertItemsEqual(selection, [{i: j for i in TestSqlite.COLUMNS for j in currRecord} for currRecord in TestSqlite.RECORDS])
 
+    def test_select_some(self):
+        db = dbInterface.Database(databaseName=TestSqlite.DATABASE_NAME)
+        table = db.getTable(TestSqlite.TABLE_NAME)
+        selection = table.select(name="Mel Brooks")
+        self.assertItemsEqual(selection, RECORDS[:1])
+
     def setUp(self):
         cursor = sqlite3.connect(TestSqlite.DATABASE_NAME).cursor()
         cursor.execute("create table %s (name varchar, address varchar, email varchar, phone real)" % TestSqlite.TABLE_NAME)

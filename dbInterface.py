@@ -14,11 +14,14 @@ class Database:
     
         def select(self, **kwargs):
             # Someday I should have a Selection object, but that's for another day
+            inputString = "select %s from %s" % (", ".join(self.columns), self.name)
             output = []
             if not kwargs:
-                output = list(self.connection.cursor().execute("select %s from %s" % (", ".join(self.columns), self.name)))
+                output = list(self.connection.cursor().execute(inputString))
             else:
-                output = list(self.connection.cursor().execute("select (%s) from table %s where %s" % (",".join(self.columns), self.name, " and ".join("%s=?" % i for i in kwargs.keys())),
+                # Make this use inputString. Something else is wrong with it, but I don't know what
+                print "select %s from table %s where %s" % (",".join(self.columns), self.name, " and ".join("%s=?" % i for i in kwargs.keys()))
+                output = list(self.connection.cursor().execute("select %s from %s where %s" % (",".join(self.columns), self.name, " and ".join("%s=?" % i for i in kwargs.keys())),
                                                            (i for i in kwargs.values())))
             return [{i:j for i in self.columns for j in currLine} for currLine in output]
 
