@@ -36,7 +36,7 @@ class Database:
                                              kwargs.values())
             self.connection.commit()
 
-    def __init__(self, databaseName=None, username=None):
+    def __init__(self):
         if ENV.DATABASE == "pgsql":
             raise NotImplementedError("I haven't done the postgres layer yet")
         elif ENV.DATABASE == "sqlite":
