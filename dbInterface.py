@@ -45,3 +45,13 @@ class Database:
             raise Exception("%s isn't the name of a database I know about" % ENV.DATABASE)
     def getTable(self, tableName):
         return Database.Table(self.connection, tableName)
+
+def createTable(name, *cols):
+    if not reduce(lambda x, y: x and type(y) == type({}), cols):
+        raise Exception("You didn't give dictionaries for the columns!")
+    connection = sqlite3.connect(ENV.DB_FILE)
+    connection.cursor("create table %s (%s)" % (name, ",".join("%s %s %s" % (i["name"], 
+                                                                             i["type"], 
+                                                                             "not null" if not i.get("null", True) else "") 
+                                                               for i in cols)))
+    connection.commit()
