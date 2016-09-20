@@ -39,8 +39,8 @@ class TestSqlite(unittest.TestCase):
         dbInterface.createTable(TestSqlite.CREATED_TABLE_NAME, *TestSqlite.CREATED_TABLE_COLS)
 
         cursor = sqlite3.connect(TestSqlite.DATABASE_NAME).cursor()
-        self.assertIn(TestSqlite.CREATED_TABLE, (i[0] for i in cursor.execute("select name from sqlite_master where type=\"table\"")))
-        cols = list(cursor.execute("pragma table_info(%s" % TestSqlite.CREATED_TABLE_NAME))
+        self.assertIn(TestSqlite.CREATED_TABLE_NAME, (i[0] for i in cursor.execute("select name from sqlite_master where type=\"table\"")))
+        cols = list(cursor.execute("pragma table_info(%s)" % TestSqlite.CREATED_TABLE_NAME))
         self.assertItemsEqual([col[1] for col in cols], [i["name"] for i in TestSqlite.CREATED_TABLE_COLS])
         charlieNull = cols[map(lambda x: x[1], cols).index("charlie")][3]
         self.assertEquals(1, charlieNull)
@@ -52,7 +52,8 @@ class TestSqlite(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         cursor = sqlite3.connect(TestSqlite.DATABASE_NAME).cursor()
-        cursor.execute("drop table if exists %s" % TestSqlite.TABLE_NAME)
+        for i in [TestSqlite.TABLE_NAME, TestSqlite.CREATED_TABLE_NAME]:
+            cursor.execute("drop table if exists %s" % i)
         cursor.execute("create table %s (name varchar, address varchar, email varchar, phone real)" % TestSqlite.TABLE_NAME)
         for i in TestSqlite.RECORDS:
             cursor.execute("insert into %s (%s) VALUES (%s)" % (TestSqlite.TABLE_NAME, ",".join(TestSqlite.COLUMNS), ",".join(repr(j) for j in i)))

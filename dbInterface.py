@@ -50,8 +50,7 @@ def createTable(name, *cols):
     if not reduce(lambda x, y: x and type(y) == type({}), cols):
         raise Exception("You didn't give dictionaries for the columns!")
     connection = sqlite3.connect(ENV.DB_FILE)
-    connection.cursor("create table %s (%s)" % (name, ",".join("%s %s %s" % (i["name"], 
-                                                                             i["type"], 
-                                                                             "not null" if not i.get("null", True) else "") 
-                                                               for i in cols)))
+    i = cols[0]
+    query = "create table %s (%s)" % (name, ",".join("%s %s %s" % (i["name"], i["type"], "not null" if not i.get("null", True) else "") for i in cols))
+    connection.cursor().execute(query)
     connection.commit()
