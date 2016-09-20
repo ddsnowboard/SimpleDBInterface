@@ -36,7 +36,7 @@ class TestSqlite(unittest.TestCase):
         self.assertItemsEqual(TestSqlite.RECORDS + [RECORD], list(list(i) for i in cursor.execute("select %s from %s" % (",".join(TestSqlite.COLUMNS), TestSqlite.TABLE_NAME))))
         
     def test_create_table(self):
-        dbInterface.createTable(TestSqlite.CREATED_TABLE_NAME, *TestSqlite.CREATED_TABLE_COLS)
+        table = dbInterface.createTable(TestSqlite.CREATED_TABLE_NAME, *TestSqlite.CREATED_TABLE_COLS)
 
         cursor = sqlite3.connect(TestSqlite.DATABASE_NAME).cursor()
         self.assertIn(TestSqlite.CREATED_TABLE_NAME, (i[0] for i in cursor.execute("select name from sqlite_master where type=\"table\"")))
@@ -44,6 +44,8 @@ class TestSqlite(unittest.TestCase):
         self.assertItemsEqual([col[1] for col in cols], [i["name"] for i in TestSqlite.CREATED_TABLE_COLS])
         charlieNull = cols[map(lambda x: x[1], cols).index("charlie")][3]
         self.assertEquals(1, charlieNull)
+        c = cursor.execute("pragma table_info(%s)" % TestSqlite.CREATED_TABLE_NAME)
+        self.assertItemsEqual(table.getColumns(), {row[1]: {i: j for (i, j) in zip(("id", "type", "notnull", "default", "pk"), row[:1] + row[2:])} for row in c})
 
     def test_bad_create_table(self):
         with self.assertRaises(Exception):

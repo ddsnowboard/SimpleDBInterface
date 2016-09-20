@@ -3,7 +3,7 @@ First, you need to make an ENV.py file and put it in the same directory as dbInt
 DATABASE = "sqlite"
 DB_FILE = "database.db"
 
-`DATABASE` is the type of datbase which you are using. Right now, only "sqlite" is supported, but I'm going to add "psql" (postgres) before long. `DB_FILE` is the name of the sqlite database file in your filesystem. 
+`DATABASE` is the type of datbase which you are using. Right now, only "sqlite" is supported, but I'm going to add "psql" (postgres) before long. `DB_FILE` is the name of the sqlite database file in your filesystem. You can leave it as the default if you want, but I would recommend naming the database file something more descriptive.
 
 
 class Database
@@ -15,9 +15,13 @@ class Table
 
 This class has two important methods: `select` and `insert`. Select is the name in databases for reading things from a databases, and inserting is the term for adding things to the database.
 
-`select(column=value...)` is the method for reading things from the database. It will return a list of dicts for each row in the database for which the constraints are met (ie, for which the columns equal the given values). The dicts are of the form {column : value}. 
+`select(column=value...)` is the method for reading things from the database. It will return a list of dicts for each row in the database for which the constraints are met (ie, for which the columns equal the given values). The dicts are of the form {columnName: value}. 
 
 `insert(column=value...)` is the opposite of `select()`. It puts in a new row specified by the keyword arguments. 
 
+`getColumns()` returns all the columns in the table, as a dict with the keys the names of the columns and the values themselves dicts with the other data about the columns. They look like this: {'default': None, 'pk': 0, 'type': 'integer', 'id': 0, 'notnull': 0}.
+`notnull` will be one if the column is non-nullable.
+
 
 If you don't already have a database created, you'll have to use `createTable(name, columns...)`. This works just like it looks: the first argument is the name of the table, and the next ones, of arbitrary number, are the columns, each as a dict of the form {"name": name, "type": dataType}, where dataType is one of the available datatypes in your chosen database (usually "real", for floats, "integer", or "varchar", for strings). There is also the optional key "null", whose value is a boolean telling whether that column can be empty or not. This returns the `Table`.
+

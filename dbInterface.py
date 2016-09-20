@@ -3,6 +3,7 @@ import ENV
 # import psycopg2
 import sqlite3
 
+#TODO: Replace every pragma table_info() call with getColumns()
 
 class Database:
     class Table:
@@ -36,6 +37,12 @@ class Database:
                                              kwargs.values())
             self.connection.commit()
 
+        def getColumns(self):
+            # The pragma returns a list of tuples of the form (id| name| type| notnull| default| pk)
+            c = self.connection.cursor().execute("pragma table_info(%s)" % self.name)
+            c = self.connection.cursor().execute("pragma table_info(%s)" % self.name)
+            return {row[1]: {i: j for (i, j) in zip(("id", "type", "notnull", "default", "pk"), row[:1] + row[2:])} for row in c}
+
     def __init__(self):
         if ENV.DATABASE == "pgsql":
             raise NotImplementedError("I haven't done the postgres layer yet")
@@ -54,3 +61,6 @@ def createTable(name, *cols):
     query = "create table %s (%s)" % (name, ",".join("%s %s %s" % (i["name"], i["type"], "not null" if not i.get("null", True) else "") for i in cols))
     connection.cursor().execute(query)
     connection.commit()
+    db = Database() 
+    table = db.getTable(name)
+    return table
