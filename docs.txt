@@ -1,0 +1,20 @@
+First, you need to make an ENV.py file and put it in the same directory as dbInterface.py. It should look like this:
+
+DATABASE = "sqlite"
+DB_FILE = "database.db"
+
+`DATABASE` is the type of datbase which you are using. Right now, only "sqlite" is supported, but I'm going to add "psql" (postgres) before long. `DB_FILE` is the name of the sqlite database file in your filesystem. 
+
+
+class Database
+    The `Database` class is the starting point for using the interface. Using the constructor `Database()` to get a `Database` object that you can then use to access individual tables. 
+
+The only interesting method of this class is `getTable(tableName)`. This returns a `Table` object for the table specified by `tableName`. 
+
+class Table
+
+This class has two important methods: `select` and `insert`. Select is the name in databases for reading things from a databases, and inserting is the term for adding things to the database.
+
+`select(column=value...)` is the method for reading things from the database. It will return a list of dicts for each row in the database for which the constraints are met (ie, for which the columns equal the given values). The dicts are of the form {column : value}. 
+
+`insert(column=value...)` is the opposite of `select()`. It puts in a new row specified by the keyword arguments. 
