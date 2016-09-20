@@ -19,12 +19,22 @@ class Database:
             if not kwargs:
                 output = list(self.connection.cursor().execute(inputString))
             else:
-                # Make this use inputString. Something else is wrong with it, but I don't know what
-                print "select %s from table %s where %s" % (",".join(self.columns), self.name, " and ".join("%s=?" % i for i in kwargs.keys()))
+                inputString = "%s where %s" % (inputString, " and ".join("%s=?" % i for i in kwargs.keys()))
                 output = list(self.connection.cursor().execute("select %s from %s where %s" % (",".join(self.columns), self.name, " and ".join("%s=?" % i for i in kwargs.keys())),
-                                                           (i for i in kwargs.values())))
-            return [{i:j for i in self.columns for j in currLine} for currLine in output]
+                                                           [i for i in kwargs.values()]))
+            ret = [{i:j for i, j in zip(self.columns, currLine)} for currLine in output]
+            return ret
+        
+        def insert(self, **kwargs):
+            for col in self.connection.cursor().execute("pragma table_info(%s)" % self.name):
+                id, name, type, notnull, default, pk = col
+                if not name in kwargs.keys():
+                    if notnull:
+                        raise Exception("You have to pass in a value for %s! It can't be null!" % name)
 
+            self.connection.cursor().execute("insert into %s (%s) VALUES (%s)" % (self.name, ",".join(kwargs.keys()), ",".join("?" for i in kwargs.keys())), 
+                                             kwargs.values())
+            self.connection.commit()
 
     def __init__(self, databaseName=None, username=None):
         if ENV.DATABASE == "pgsql":

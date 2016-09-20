@@ -16,16 +16,27 @@ class TestSqlite(unittest.TestCase):
         db = dbInterface.Database(databaseName=TestSqlite.DATABASE_NAME)
         table = db.getTable(TestSqlite.TABLE_NAME)
         selection = table.select()
-        self.assertItemsEqual(selection, [{i: j for i in TestSqlite.COLUMNS for j in currRecord} for currRecord in TestSqlite.RECORDS])
+        self.assertItemsEqual(selection, [{i: j for (i, j) in zip(TestSqlite.COLUMNS, currRecord)} for currRecord in TestSqlite.RECORDS])
 
     def test_select_some(self):
         db = dbInterface.Database(databaseName=TestSqlite.DATABASE_NAME)
         table = db.getTable(TestSqlite.TABLE_NAME)
         selection = table.select(name="Mel Brooks")
-        self.assertItemsEqual(selection, RECORDS[:1])
+        self.assertItemsEqual(selection, [{i: j for (i, j) in zip(TestSqlite.COLUMNS, TestSqlite.RECORDS[0])}])
+    
+    def test_insert_row(self):
+        RECORD = ["Andy Dufresne", "234 CD Street", "andy@nycorrections.gov", 1425552424]
+        db = dbInterface.Database(databaseName=TestSqlite.DATABASE_NAME)
+        table = db.getTable(TestSqlite.TABLE_NAME)
+        table.insert(**{i:j for (i, j) in zip(TestSqlite.COLUMNS, RECORD)})
+        cursor = sqlite3.connect(TestSqlite.DATABASE_NAME).cursor()
+        self.assertItemsEqual(TestSqlite.RECORDS + [RECORD], list(list(i) for i in cursor.execute("select %s from %s" % (",".join(TestSqlite.COLUMNS), TestSqlite.TABLE_NAME))))
+        
 
     def setUp(self):
+        self.maxDiff = None
         cursor = sqlite3.connect(TestSqlite.DATABASE_NAME).cursor()
+        cursor.execute("drop table if exists %s" % TestSqlite.TABLE_NAME)
         cursor.execute("create table %s (name varchar, address varchar, email varchar, phone real)" % TestSqlite.TABLE_NAME)
         for i in TestSqlite.RECORDS:
             cursor.execute("insert into %s (%s) VALUES (%s)" % (TestSqlite.TABLE_NAME, ",".join(TestSqlite.COLUMNS), ",".join(repr(j) for j in i)))
